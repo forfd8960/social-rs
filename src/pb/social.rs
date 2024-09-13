@@ -12,15 +12,15 @@ pub struct GreetResponse {
     pub msg: ::prost::alloc::string::String,
 }
 /// Generated client implementations.
-pub mod user_stats_client {
+pub mod social_service_client {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
     use tonic::codegen::*;
     use tonic::codegen::http::Uri;
     #[derive(Debug, Clone)]
-    pub struct UserStatsClient<T> {
+    pub struct SocialServiceClient<T> {
         inner: tonic::client::Grpc<T>,
     }
-    impl UserStatsClient<tonic::transport::Channel> {
+    impl SocialServiceClient<tonic::transport::Channel> {
         /// Attempt to create a new client by connecting to a given endpoint.
         pub async fn connect<D>(dst: D) -> Result<Self, tonic::transport::Error>
         where
@@ -31,7 +31,7 @@ pub mod user_stats_client {
             Ok(Self::new(conn))
         }
     }
-    impl<T> UserStatsClient<T>
+    impl<T> SocialServiceClient<T>
     where
         T: tonic::client::GrpcService<tonic::body::BoxBody>,
         T::Error: Into<StdError>,
@@ -49,7 +49,7 @@ pub mod user_stats_client {
         pub fn with_interceptor<F>(
             inner: T,
             interceptor: F,
-        ) -> UserStatsClient<InterceptedService<T, F>>
+        ) -> SocialServiceClient<InterceptedService<T, F>>
         where
             F: tonic::service::Interceptor,
             T::ResponseBody: Default,
@@ -63,7 +63,7 @@ pub mod user_stats_client {
                 http::Request<tonic::body::BoxBody>,
             >>::Error: Into<StdError> + Send + Sync,
         {
-            UserStatsClient::new(InterceptedService::new(inner, interceptor))
+            SocialServiceClient::new(InterceptedService::new(inner, interceptor))
         }
         /// Compress requests with the given encoding.
         ///
@@ -110,27 +110,30 @@ pub mod user_stats_client {
                     )
                 })?;
             let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static("/social.UserStats/Greet");
+            let path = http::uri::PathAndQuery::from_static(
+                "/social.SocialService/Greet",
+            );
             let mut req = request.into_request();
-            req.extensions_mut().insert(GrpcMethod::new("social.UserStats", "Greet"));
+            req.extensions_mut()
+                .insert(GrpcMethod::new("social.SocialService", "Greet"));
             self.inner.unary(req, path, codec).await
         }
     }
 }
 /// Generated server implementations.
-pub mod user_stats_server {
+pub mod social_service_server {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
     use tonic::codegen::*;
-    /// Generated trait containing gRPC methods that should be implemented for use with UserStatsServer.
+    /// Generated trait containing gRPC methods that should be implemented for use with SocialServiceServer.
     #[async_trait]
-    pub trait UserStats: Send + Sync + 'static {
+    pub trait SocialService: Send + Sync + 'static {
         async fn greet(
             &self,
             request: tonic::Request<super::GreetRequest>,
         ) -> std::result::Result<tonic::Response<super::GreetResponse>, tonic::Status>;
     }
     #[derive(Debug)]
-    pub struct UserStatsServer<T: UserStats> {
+    pub struct SocialServiceServer<T: SocialService> {
         inner: _Inner<T>,
         accept_compression_encodings: EnabledCompressionEncodings,
         send_compression_encodings: EnabledCompressionEncodings,
@@ -138,7 +141,7 @@ pub mod user_stats_server {
         max_encoding_message_size: Option<usize>,
     }
     struct _Inner<T>(Arc<T>);
-    impl<T: UserStats> UserStatsServer<T> {
+    impl<T: SocialService> SocialServiceServer<T> {
         pub fn new(inner: T) -> Self {
             Self::from_arc(Arc::new(inner))
         }
@@ -190,9 +193,9 @@ pub mod user_stats_server {
             self
         }
     }
-    impl<T, B> tonic::codegen::Service<http::Request<B>> for UserStatsServer<T>
+    impl<T, B> tonic::codegen::Service<http::Request<B>> for SocialServiceServer<T>
     where
-        T: UserStats,
+        T: SocialService,
         B: Body + Send + 'static,
         B::Error: Into<StdError> + Send + 'static,
     {
@@ -208,11 +211,12 @@ pub mod user_stats_server {
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
             let inner = self.inner.clone();
             match req.uri().path() {
-                "/social.UserStats/Greet" => {
+                "/social.SocialService/Greet" => {
                     #[allow(non_camel_case_types)]
-                    struct GreetSvc<T: UserStats>(pub Arc<T>);
-                    impl<T: UserStats> tonic::server::UnaryService<super::GreetRequest>
-                    for GreetSvc<T> {
+                    struct GreetSvc<T: SocialService>(pub Arc<T>);
+                    impl<
+                        T: SocialService,
+                    > tonic::server::UnaryService<super::GreetRequest> for GreetSvc<T> {
                         type Response = super::GreetResponse;
                         type Future = BoxFuture<
                             tonic::Response<Self::Response>,
@@ -224,7 +228,7 @@ pub mod user_stats_server {
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
                             let fut = async move {
-                                <T as UserStats>::greet(&inner, request).await
+                                <T as SocialService>::greet(&inner, request).await
                             };
                             Box::pin(fut)
                         }
@@ -267,7 +271,7 @@ pub mod user_stats_server {
             }
         }
     }
-    impl<T: UserStats> Clone for UserStatsServer<T> {
+    impl<T: SocialService> Clone for SocialServiceServer<T> {
         fn clone(&self) -> Self {
             let inner = self.inner.clone();
             Self {
@@ -279,7 +283,7 @@ pub mod user_stats_server {
             }
         }
     }
-    impl<T: UserStats> Clone for _Inner<T> {
+    impl<T: SocialService> Clone for _Inner<T> {
         fn clone(&self) -> Self {
             Self(Arc::clone(&self.0))
         }
@@ -289,7 +293,7 @@ pub mod user_stats_server {
             write!(f, "{:?}", self.0)
         }
     }
-    impl<T: UserStats> tonic::server::NamedService for UserStatsServer<T> {
-        const NAME: &'static str = "social.UserStats";
+    impl<T: SocialService> tonic::server::NamedService for SocialServiceServer<T> {
+        const NAME: &'static str = "social.SocialService";
     }
 }

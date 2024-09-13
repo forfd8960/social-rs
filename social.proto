@@ -4,7 +4,7 @@ package social;
 
 // import "google/protobuf/timestamp.proto";
 
-service UserStats {
+service SocialService {
     rpc Greet(GreetRequest) returns (GreetResponse) {}
 }
 
