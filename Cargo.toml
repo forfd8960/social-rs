@@ -1,0 +1,20 @@
+[package]
+name = "social"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.82"
+chrono = { version = "0.4.38", features = ["serde"] }
+derive_builder = "0.20.0"
+futures = "0.3.30"
+prost = "0.12.4"
+prost-types = "0.12.4"
+tokio = { version = "1.40.0", features = ["rt", "rt-multi-thread", "macros"] }
+tokio-stream = "0.1.15"
+tonic = { version = "0.11.0", features = ["zstd", "tls"] }
+tonic-build = "0.11.0"
+
+[build-dependencies]
+anyhow = "1.0.82"
+tonic-build = "0.11.0"

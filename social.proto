@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package social;
+
+// import "google/protobuf/timestamp.proto";
+
+service UserStats {
+    rpc Greet(GreetRequest) returns (GreetResponse) {}
+}
+
+message GreetRequest {
+    string msg = 1;
+}
+
+message GreetResponse {
+    string msg = 1;
+}
