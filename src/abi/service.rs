@@ -31,6 +31,8 @@ impl SocialService for SocialServiceImpl {
         &self,
         request: Request<GreetRequest>,
     ) -> Result<Response<GreetResponse>, Status> {
+        println!("get request: {:?}", request);
+
         let req = request.into_inner();
 
         let resp = format!("Hello {}, Welcome!", req.msg);

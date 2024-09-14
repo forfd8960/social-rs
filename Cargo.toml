@@ -18,3 +18,7 @@ tonic-build = "0.11.0"
 [build-dependencies]
 anyhow = "1.0.82"
 tonic-build = "0.11.0"
+
+[[bin]]
+name = "social-client"
+path = "client/main.rs"
