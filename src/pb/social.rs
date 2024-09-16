@@ -11,6 +11,81 @@ pub struct GreetResponse {
     #[prost(string, tag = "1")]
     pub msg: ::prost::alloc::string::String,
 }
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PostFeedRequest {
+    #[prost(int32, tag = "1")]
+    pub limit: i32,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PostFeedResponse {
+    #[prost(message, repeated, tag = "1")]
+    pub posts: ::prost::alloc::vec::Vec<Post>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct User {
+    #[prost(string, tag = "1")]
+    pub user_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub nick_name: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub user_name: ::prost::alloc::string::String,
+    #[prost(string, tag = "4")]
+    pub avatar: ::prost::alloc::string::String,
+    #[prost(string, tag = "5")]
+    pub bio: ::prost::alloc::string::String,
+    #[prost(string, tag = "6")]
+    pub email: ::prost::alloc::string::String,
+    #[prost(string, tag = "7")]
+    pub web_site: ::prost::alloc::string::String,
+    #[prost(string, tag = "8")]
+    pub birthday: ::prost::alloc::string::String,
+    #[prost(message, optional, tag = "9")]
+    pub created_at: ::core::option::Option<::prost_types::Timestamp>,
+    #[prost(message, optional, tag = "10")]
+    pub updated_at: ::core::option::Option<::prost_types::Timestamp>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Content {
+    #[prost(string, tag = "1")]
+    pub text: ::prost::alloc::string::String,
+    #[prost(string, repeated, tag = "2")]
+    pub images: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    #[prost(string, repeated, tag = "3")]
+    pub videos: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Post {
+    #[prost(string, tag = "1")]
+    pub post_id: ::prost::alloc::string::String,
+    #[prost(message, optional, tag = "2")]
+    pub user: ::core::option::Option<User>,
+    #[prost(message, optional, tag = "3")]
+    pub content: ::core::option::Option<Content>,
+    #[prost(message, optional, tag = "4")]
+    pub created_at: ::core::option::Option<::prost_types::Timestamp>,
+    #[prost(message, optional, tag = "5")]
+    pub updated_at: ::core::option::Option<::prost_types::Timestamp>,
+}
+/// Post Comment
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Comment {
+    #[prost(string, tag = "1")]
+    pub comment_id: ::prost::alloc::string::String,
+    #[prost(message, optional, tag = "2")]
+    pub user: ::core::option::Option<User>,
+    #[prost(message, optional, tag = "3")]
+    pub content: ::core::option::Option<Content>,
+    #[prost(message, optional, tag = "4")]
+    pub created_at: ::core::option::Option<::prost_types::Timestamp>,
+    #[prost(message, optional, tag = "5")]
+    pub updated_at: ::core::option::Option<::prost_types::Timestamp>,
+}
 /// Generated client implementations.
 pub mod social_service_client {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
@@ -118,6 +193,31 @@ pub mod social_service_client {
                 .insert(GrpcMethod::new("social.SocialService", "Greet"));
             self.inner.unary(req, path, codec).await
         }
+        pub async fn post_feed(
+            &mut self,
+            request: impl tonic::IntoRequest<super::PostFeedRequest>,
+        ) -> std::result::Result<
+            tonic::Response<tonic::codec::Streaming<super::PostFeedResponse>>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/social.SocialService/PostFeed",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("social.SocialService", "PostFeed"));
+            self.inner.server_streaming(req, path, codec).await
+        }
     }
 }
 /// Generated server implementations.
@@ -131,6 +231,16 @@ pub mod social_service_server {
             &self,
             request: tonic::Request<super::GreetRequest>,
         ) -> std::result::Result<tonic::Response<super::GreetResponse>, tonic::Status>;
+        /// Server streaming response type for the PostFeed method.
+        type PostFeedStream: tonic::codegen::tokio_stream::Stream<
+                Item = std::result::Result<super::PostFeedResponse, tonic::Status>,
+            >
+            + Send
+            + 'static;
+        async fn post_feed(
+            &self,
+            request: tonic::Request<super::PostFeedRequest>,
+        ) -> std::result::Result<tonic::Response<Self::PostFeedStream>, tonic::Status>;
     }
     #[derive(Debug)]
     pub struct SocialServiceServer<T: SocialService> {
@@ -252,6 +362,53 @@ pub mod social_service_server {
                                 max_encoding_message_size,
                             );
                         let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/social.SocialService/PostFeed" => {
+                    #[allow(non_camel_case_types)]
+                    struct PostFeedSvc<T: SocialService>(pub Arc<T>);
+                    impl<
+                        T: SocialService,
+                    > tonic::server::ServerStreamingService<super::PostFeedRequest>
+                    for PostFeedSvc<T> {
+                        type Response = super::PostFeedResponse;
+                        type ResponseStream = T::PostFeedStream;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::ResponseStream>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::PostFeedRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as SocialService>::post_feed(&inner, request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = PostFeedSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.server_streaming(method, req).await;
                         Ok(res)
                     };
                     Box::pin(fut)
