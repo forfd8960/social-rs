@@ -1,12 +1,9 @@
 use std::{ops::Deref, pin::Pin, sync::Arc, time::Duration};
 
 use futures::Stream;
-use tokio::{
-    sync::mpsc::{Receiver, Sender},
-    time::sleep,
-};
+use tokio::{sync::mpsc, time::sleep};
+use tokio_stream::wrappers::ReceiverStream;
 use tonic::{async_trait, Request, Response, Status};
-use tracing::warn;
 
 use crate::pb::social::{
     social_service_server::{SocialService, SocialServiceServer},
@@ -23,16 +20,12 @@ pub struct SocialServiceImpl {
     inner: Arc<SocialServiceInner>,
 }
 
-pub struct SocialServiceInner {
-    post_chan: Receiver<Post>,
-}
+pub struct SocialServiceInner {}
 
 impl SocialServiceImpl {
     pub fn new() -> Self {
         Self {
-            inner: Arc::new(SocialServiceInner {
-                post_chan: init_post_sender(),
-            }),
+            inner: Arc::new(SocialServiceInner {}),
         }
     }
 
@@ -41,20 +34,20 @@ impl SocialServiceImpl {
     }
 }
 
-fn init_post_sender() -> Receiver<Post> {
-    let (tx, rx) = tokio::sync::mpsc::channel(CHAN_SIZE);
-    tokio::spawn(async move {
-        loop {
-            println!("send post to sender");
-            let _ = tx.send(Post::fake()).await.map_err(|err| {
-                warn!("send post failed: {:?}", err);
-            });
+// fn init_post_sender() -> Receiver<Post> {
+//     let (tx, rx) = tokio::sync::mpsc::channel(CHAN_SIZE);
+//     tokio::spawn(async move {
+//         loop {
+//             println!("send post to sender");
+//             let _ = tx.send(Post::fake()).await.map_err(|err| {
+//                 warn!("send post failed: {:?}", err);
+//             });
 
-            sleep(Duration::from_secs(5)).await;
-        }
-    });
-    rx
-}
+//             sleep(Duration::from_secs(5)).await;
+//         }
+//     });
+//     rx
+// }
 
 #[async_trait]
 impl SocialService for SocialServiceImpl {
@@ -71,9 +64,27 @@ impl SocialService for SocialServiceImpl {
     async fn post_feed(
         &self,
         request: Request<PostFeedRequest>,
-    ) -> ServiceResult<Self::PostFeedStream> {
-        println!("get request: {:?}", request);
-        todo!()
+    ) -> Result<Response<Self::PostFeedStream>, Status> {
+        let req = request.into_inner();
+        println!("req: {:?}", req);
+
+        let (tx, rx) = mpsc::channel(CHAN_SIZE);
+
+        tokio::spawn(async move {
+            loop {
+                println!("send post to sender");
+
+                let response = PostFeedResponse {
+                    posts: vec![Post::fake()],
+                };
+                tx.send(Ok(response)).await.unwrap();
+
+                sleep(Duration::from_secs(3)).await;
+            }
+        });
+
+        let stream = ReceiverStream::new(rx);
+        Ok(Response::new(Box::pin(stream)))
     }
 }
 
