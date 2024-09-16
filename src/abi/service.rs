@@ -4,6 +4,7 @@ use futures::Stream;
 use tokio::{sync::mpsc, time::sleep};
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{async_trait, Request, Response, Status};
+use tracing::warn;
 
 use crate::pb::social::{
     social_service_server::{SocialService, SocialServiceServer},
@@ -77,7 +78,9 @@ impl SocialService for SocialServiceImpl {
                 let response = PostFeedResponse {
                     posts: vec![Post::fake()],
                 };
-                tx.send(Ok(response)).await.unwrap();
+                let _ = tx.send(Ok(response)).await.map_err(|err| {
+                    warn!("send post failed: {:?}", err);
+                });
 
                 sleep(Duration::from_secs(3)).await;
             }

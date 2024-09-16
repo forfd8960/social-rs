@@ -1,18 +1,21 @@
-use std::net::SocketAddr;
-
 use social::abi::service::SocialServiceImpl;
+use std::net::SocketAddr;
 use tonic::transport::Server;
+use tracing::{info, level_filters::LevelFilter};
+use tracing_subscriber::{fmt::Layer, layer::SubscriberExt, util::SubscriberInitExt, Layer as _};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    println!("starting social service server");
+    let layer = Layer::new().with_filter(LevelFilter::INFO);
+    tracing_subscriber::registry().with(layer).init();
+    info!("starting social service server");
 
     let addr: SocketAddr = "[::1]:9090".parse().unwrap();
 
-    println!("init social service server...");
+    info!("init social service server...");
     let service = SocialServiceImpl::new().into_server();
 
-    println!("serve social service at {}", addr);
+    info!("serve social service at {}", addr);
     Server::builder().add_service(service).serve(addr).await?;
     Ok(())
 }
